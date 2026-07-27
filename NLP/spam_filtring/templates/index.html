@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spam Filter Bot</title>
+    <link rel="stylesheet" href="../static/styles.css" />
+  </head>
+  <body>
+    <main class="page-content">
+      <h1>Spam Filter Demo</h1>
+      <p>
+        Open the bot in the corner and test any message/email text (Arabic or
+        English).
+      </p>
+    </main>
+
+    <!-- Chat Toggle Button -->
+    <button
+      id="chat-btn"
+      class="chat-btn"
+      aria-label="Open spam filter chat"
+      aria-expanded="false"
+      aria-controls="chat-window"
+    >
+      Spam Bot
+    </button>
+
+    <!-- Chat Window -->
+    <section
+      id="chat-window"
+      class="chat-window hidden"
+      role="region"
+      aria-label="Spam Filter Chat"
+    >
+      <header class="chat-header">
+        <h2>Spam Filter Bot</h2>
+        <button
+          class="chat-close"
+          aria-label="Close chat"
+          aria-controls="chat-window"
+        >
+          ×
+        </button>
+      </header>
+
+      <div id="messages" class="messages" role="log" aria-live="polite">
+        <!-- Messages will be displayed here -->
+      </div>
+
+      <form class="chat-input-area" aria-label="Send spam classification request">
+        <div class="input-group">
+          <label for="email-input" class="sr-only">Enter email text</label>
+          <textarea
+            id="email-input"
+            class="email-input"
+            rows="4"
+            placeholder="Type message here..."
+            aria-label="Email or message text to classify"
+          ></textarea>
+        </div>
+
+        <button
+          id="send-btn"
+          type="submit"
+          class="send-btn"
+          aria-label="Classify message"
+        >
+          Classify
+        </button>
+      </form>
+    </section>
+
+    <script src="../static/app.js"></script>
+  </body>
+</html>

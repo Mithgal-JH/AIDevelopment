@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Customer Churn Bot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:       #0a0d14;
+            --surface:  #111520;
+            --surface2: #181d2e;
+            --border:   #1f2640;
+            --accent:   #4f6ef7;
+            --accent2:  #7c3aed;
+            --success:  #10b981;
+            --danger:   #ef4444;
+            --text:     #e2e8f0;
+            --muted:    #6b7a99;
+            --mono:     'Space Mono', monospace;
+            --sans:     'Syne', sans-serif;
+            --radius:   16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(79,110,247,.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(79,110,247,.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Page ── */
+        .page {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            text-align: center;
+            gap: 1.25rem;
+        }
+
+        .title {
+            font-family: var(--sans);
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 800;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #fff 30%, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+        }
+
+        .subtitle {
+            font-family: var(--mono);
+            font-size: .85rem;
+            color: var(--muted);
+            max-width: 420px;
+            line-height: 1.7;
+            border: 1px solid var(--border);
+            padding: .75rem 1.25rem;
+            border-radius: 8px;
+            background: rgba(255,255,255,.02);
+        }
+
+        /* ── Toggle Button ── */
+        .chat-toggle {
+            position: fixed;
+            right: 2rem;
+            bottom: 2rem;
+            z-index: 100;
+            width: 58px;
+            height: 58px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff;
+            font-size: 22px;
+            cursor: pointer;
+            box-shadow: 0 0 0 0 rgba(79,110,247,.5);
+            animation: pulse 2.5s infinite;
+            transition: transform .2s, box-shadow .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-toggle:hover {
+            transform: translateY(-2px) scale(1.06);
+            box-shadow: 0 8px 30px rgba(79,110,247,.45);
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(79,110,247,.5); }
+            50%      { box-shadow: 0 0 0 12px rgba(79,110,247,0); }
+        }
+
+        /* ── Chatbot Window ── */
+        .chatbot {
+            position: fixed;
+            right: 2rem;
+            bottom: 6rem;
+            z-index: 99;
+            width: 360px;
+            max-width: calc(100vw - 2rem);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 24px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(79,110,247,.08);
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+            transform-origin: bottom right;
+        }
+
+        .chatbot.open {
+            display: flex;
+            animation: slideUp .25s cubic-bezier(.34,1.56,.64,1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: scale(.9) translateY(16px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* ── Header ── */
+        .chat-header {
+            padding: 1rem 1.25rem;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff;
+            font-family: var(--sans);
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: .3px;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            position: relative;
+        }
+
+        .chat-header::before {
+            content: '⬡';
+            font-size: .8rem;
+            opacity: .8;
+        }
+
+        .chat-header::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fff' fill-opacity='0.04'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        /* ── Messages ── */
+        .chat-messages {
+            height: 340px;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: .65rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+
+        .chat-messages::-webkit-scrollbar { width: 4px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+        .msg {
+            padding: .7rem .95rem;
+            border-radius: 12px;
+            font-size: .8rem;
+            line-height: 1.6;
+            white-space: pre-line;
+            animation: fadeIn .2s ease;
+            font-family: var(--mono);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .bot {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            align-self: flex-start;
+            max-width: 88%;
+        }
+
+        /* Highlight prediction result */
+        .bot.result {
+            background: rgba(16,185,129,.08);
+            border: 1px solid rgba(16,185,129,.25);
+            color: #6ee7b7;
+        }
+
+        .user {
+            background: linear-gradient(135deg, rgba(79,110,247,.2), rgba(124,58,237,.15));
+            border: 1px solid rgba(79,110,247,.25);
+            color: #c7d4ff;
+            align-self: flex-end;
+            max-width: 75%;
+        }
+
+        /* ── Input Area ── */
+        .chat-input {
+            display: flex;
+            gap: .6rem;
+            padding: .85rem 1rem;
+            border-top: 1px solid var(--border);
+            background: var(--surface2);
+        }
+
+        .chat-input input {
+            flex: 1;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: .8rem;
+            padding: .65rem .9rem;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .chat-input input::placeholder { color: var(--muted); }
+
+        .chat-input input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79,110,247,.12);
+        }
+
+        .chat-input button {
+            border: none;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff;
+            border-radius: 10px;
+            padding: 0 1rem;
+            font-family: var(--sans);
+            font-weight: 700;
+            font-size: .85rem;
+            cursor: pointer;
+            transition: opacity .2s, transform .15s;
+            white-space: nowrap;
+        }
+
+        .chat-input button:hover {
+            opacity: .88;
+            transform: translateY(-1px);
+        }
+
+        .chat-input button:active { transform: translateY(0); }
+
+        @media (max-width: 480px) {
+            .chatbot { right: 1rem; bottom: 5.5rem; width: calc(100vw - 2rem); }
+            .chat-toggle { right: 1rem; bottom: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <h1 class="title">Customer Churn<br>Predictor</h1>
+        <p class="subtitle">Open the chatbot in the corner and answer the questions.</p>
+    </div>
+
+    <button id="chatToggle" class="chat-toggle" aria-label="Open chatbot">💬</button>
+
+    <div id="chatbot" class="chatbot">
+        <div class="chat-header">Churn Bot</div>
+        <div id="messages" class="chat-messages"></div>
+        <div class="chat-input">
+            <input id="userInput" type="text" placeholder="Type your answer..." />
+            <button id="sendBtn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const chatbot   = document.getElementById("chatbot");
+        const toggleBtn = document.getElementById("chatToggle");
+        const messagesEl= document.getElementById("messages");
+        const inputEl   = document.getElementById("userInput");
+        const sendBtn   = document.getElementById("sendBtn");
+
+        const steps = [
+            { key: "age",               prompt: "👤  Enter Age:" },
+            { key: "monthly_income",    prompt: "💰  Enter Monthly Income:" },
+            { key: "years_with_company",prompt: "📅  Enter Years With Company:" },
+            { key: "num_products",      prompt: "📦  Enter Number of Products:" },
+            { key: "credit_score",      prompt: "📊  Enter Credit Score:" },
+            { key: "support_calls",     prompt: "📞  Enter Support Calls:" }
+        ];
+
+        let currentStep = 0;
+        let formData    = {};
+
+        function addMessage(text, type, extraClass = "") {
+            const msg = document.createElement("div");
+            msg.className = `msg ${type}${extraClass ? " " + extraClass : ""}`;
+            msg.textContent = text;
+            messagesEl.appendChild(msg);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        function askNextQuestion() {
+            if (currentStep < steps.length) addMessage(steps[currentStep].prompt, "bot");
+        }
+
+        function resetConversation() {
+            currentStep = 0;
+            formData    = {};
+            messagesEl.innerHTML = "";
+            addMessage("Hi! I'll predict if the customer will Stay or Leave.", "bot");
+            askNextQuestion();
+        }
+
+        async function handleUserInput() {
+            const value = inputEl.value.trim();
+            if (!value) return;
+
+            addMessage(value, "user");
+            inputEl.value = "";
+
+            if (currentStep < steps.length) {
+                const numericValue = Number(value);
+                if (Number.isNaN(numericValue)) {
+                    addMessage("⚠️  Please enter a numeric value.", "bot");
+                    askNextQuestion();
+                    return;
+                }
+                formData[steps[currentStep].key] = numericValue;
+                currentStep++;
+            }
+
+            if (currentStep < steps.length) { askNextQuestion(); return; }
+
+            addMessage("⏳  Processing prediction...", "bot");
+            try {
+                const response = await fetch("/predict", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(formData)
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    addMessage(`Error: ${result.error || "Unable to predict."}`, "bot");
+                } else {
+                    addMessage(
+                        `Prediction: ${result.prediction}\nLeave Probability: ${result.leave_probability}`,
+                        "bot", "result"
+                    );
+                }
+            } catch {
+                addMessage("Error: Could not reach server.", "bot");
+            }
+
+            addMessage("Type anything to start a new prediction.", "bot");
+            currentStep = steps.length + 1;
+        }
+
+        toggleBtn.addEventListener("click", () => {
+            chatbot.classList.toggle("open");
+            if (chatbot.classList.contains("open") && messagesEl.children.length === 0) resetConversation();
+            inputEl.focus();
+        });
+
+        sendBtn.addEventListener("click", () => {
+            currentStep > steps.length ? resetConversation() : handleUserInput();
+        });
+
+        inputEl.addEventListener("keydown", e => {
+            if (e.key === "Enter") currentStep > steps.length ? resetConversation() : handleUserInput();
+        });
+    </script>
+</body>
+</html>

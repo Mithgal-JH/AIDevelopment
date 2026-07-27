@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PPU - مساعد الجامعة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface-2: #243044;
+      --accent: #2dd4bf;
+      --accent-dim: rgba(45, 212, 191, 0.15);
+      --warm: #fbbf24;
+      --warm-dim: rgba(251, 191, 36, 0.12);
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --font: "Cairo", ui-sans-serif, system-ui, sans-serif;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font);
+      background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(45, 212, 191, 0.12), transparent),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(251, 191, 36, 0.06), transparent),
+        var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      padding: 2rem;
+      direction: rtl;
+    }
+
+    header {
+      max-width: 720px;
+      margin: 0 auto 2.5rem;
+      padding: 1.5rem 1.5rem 1.8rem;
+      border-radius: var(--radius);
+      background: rgba(26, 35, 50, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--accent), var(--warm));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    header p {
+      margin: 0.75rem 0 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    .chat-toggle {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), var(--warm));
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+      color: #0f1419;
+      font-size: 1.4rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+      z-index: 20;
+    }
+
+    .chat-toggle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.4);
+    }
+
+    .chat-panel {
+      position: fixed;
+      bottom: 100px;
+      right: 24px;
+      width: min(420px, calc(100% - 48px));
+      max-height: 640px;
+      background: rgba(26, 35, 50, 0.98);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(20px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 15;
+    }
+
+    .chat-panel.open {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .panel-header {
+      padding: 1.1rem 1.25rem;
+      background: linear-gradient(180deg, rgba(26, 35, 50, 0.95) 0%, rgba(26, 35, 50, 0.7) 100%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .panel-header h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .panel-close {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      font-size: 1.15rem;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+
+    .panel-close:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    #chat {
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      overflow-y: auto;
+      flex: 1;
+      scroll-behavior: smooth;
+    }
+
+    .msg {
+      display: flex;
+      gap: 0.65rem;
+      max-width: 86%;
+      align-items: flex-start;
+      animation: msgIn 0.35s ease-out;
+    }
+
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .msg.user { margin-left: auto; justify-content: flex-end; }
+    .msg.bot { margin-right: auto; justify-content: flex-start; }
+
+    .bubble {
+      padding: 0.8rem 1.1rem;
+      border-radius: 1.1rem;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 0.95rem;
+    }
+
+    .bubble.bot {
+      background: var(--accent-dim);
+      border: 1px solid rgba(45, 212, 191, 0.25);
+      color: #99f6e4;
+    }
+
+    .bubble.user {
+      background: var(--warm-dim);
+      border: 1px solid rgba(251, 191, 36, 0.25);
+      color: #fde68a;
+    }
+
+    .bubble.typing { padding: 0.9rem 1.3rem; }
+
+    .typing-dots span {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin: 0 2px;
+      animation: bounce 1.4s ease-in-out infinite both;
+    }
+
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.6; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.5rem;
+      padding: 1rem 1.25rem;
+      background: rgba(0, 0, 0, 0.25);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    #userInput {
+      padding: 0.85rem 1.1rem;
+      font-size: 1rem;
+      font-family: var(--font);
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    #userInput::placeholder { color: var(--muted); }
+
+    #userInput:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.2);
+    }
+
+    .btn-send {
+      padding: 0.85rem 1.35rem;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), #14b8a6);
+      color: #0f1419;
+      font-weight: 700;
+      font-family: var(--font);
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+    }
+
+    .btn-send:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(45, 212, 191, 0.35);
+    }
+
+    .btn-send:active { transform: translateY(0); }
+    .btn-send:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .chip {
+      padding: 0.5rem 0.9rem;
+      font-size: 0.85rem;
+      font-family: var(--font);
+      border-radius: 999px;
+      border: 1px solid rgba(45, 212, 191, 0.35);
+      background: rgba(45, 212, 191, 0.08);
+      color: var(--accent);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    }
+
+    .chip:hover {
+      background: rgba(45, 212, 191, 0.2);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(45, 212, 191, 0.2);
+    }
+
+    .chip:active { transform: translateY(0); }
+
+    @media (max-width: 480px) {
+      .chat-panel {
+        right: 16px;
+        bottom: 90px;
+      }
+
+      .chat-toggle { right: 16px; bottom: 16px; }
+
+      #chat { height: 280px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>جامعة PPU</h1>
+    <p>مرحبا بك في بوابة الطلبة. استخدم زر الدردشة للعثور على معلومات عن التسجيل، الجداول، المرافق، وأكثر.</p>
+  </header>
+
+  <button class="chat-toggle" id="toggleChat" aria-label="فتح الدردشة" title="فتح / إغلاق الدردشة">💬</button>
+
+  <section class="chat-panel" id="chatPanel" aria-hidden="true" aria-label="دردشة بوت" role="dialog">
+    <header class="panel-header">
+      <div>
+        <h2>مساعد PPU</h2>
+        <small style="color: var(--muted); font-size: 0.85rem;">اكتب سؤالك أو اختر اقتراحًا</small>
+      </div>
+      <button class="panel-close" id="closeChat" aria-label="إغلاق الدردشة">×</button>
+    </header>
+
+    <div id="chat" role="log" aria-live="polite"></div>
+
+    <div class="chips" id="chips" aria-label="اقتراحات سريعة">
+      <button type="button" class="chip" data-msg="كيف أضيف أو أسحب مادة؟">كيف أضيف أو أسحب مادة؟</button>
+      <button type="button" class="chip" data-msg="كيف أؤجل الدراسة؟">كيف أؤجل الدراسة؟</button>
+      <button type="button" class="chip" data-msg="كيف أستعلم عن نتائج الامتحان؟">كيف أستعلم عن نتائج الامتحان؟</button>
+      <button type="button" class="chip" data-msg="ما شروط التخرج؟">ما شروط التخرج؟</button>
+      <button type="button" class="chip" data-msg="كيف أحصل على منحة التفوق؟">كيف أحصل على منحة التفوق؟</button>
+    </div>
+
+    <form id="form" class="form-row" aria-label="إرسال رسالة">
+      <input id="userInput" type="text" placeholder="اكتب هنا..." autocomplete="off" aria-label="نص الرسالة" />
+      <button type="submit" class="btn-send" id="btnSend">إرسال</button>
+    </form>
+  </section>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const chat = document.getElementById("chat");
+      const input = document.getElementById("userInput");
+      const form = document.getElementById("form");
+      const btnSend = document.getElementById("btnSend");
+      const chips = document.getElementById("chips");
+      const toggleBtn = document.getElementById("toggleChat");
+      const closeBtn = document.getElementById("closeChat");
+      const panel = document.getElementById("chatPanel");
+
+      // Fallback logic (when server is unavailable)
+      const FALLBACK_PATTERNS = {
+        excellence: /(منحة|تفوق).*?(جامعة)?|(معدل).*?(95)/i,
+        graduation: /(تخرج|شهادة).*?(بكالوريوس)?|ما.*?(شروط).*?(التخرج)/i,
+        warning: /(تحذير).*?(أكاديمي)?|(معدل).*?(تراكمي).*?(منخفض)?/i,
+        exams: /(امتحان|اختبار).*?(نهائي)?|(علامة|نتيجة).*?(امتحان)?/i,
+        postpone: /(تأجيل|إرجاء|توقف).*?(دراسة)?|كيف.*?(أؤجل|تأجيل)/i,
+        add_drop: /(سحب|انسحاب|إضافة|استبدال|تسجيل).*?(مادة|مواد|مساق)?|(مادة|مساق).*?(سحب|إضافة)/i,
+        greeting: /(مرحبا|أهلا|السلام عليكم)/i,
+      };
+
+      const FALLBACK_RESPONSES = {
+        add_drop: "يمكن السحب أو الإضافة خلال الأسبوع الأول دون خسارة الرسوم، وبعد ذلك وحتى الأسبوع العاشر تظهر المادة بعلامة W.",
+        postpone: "يمكن تأجيل الدراسة لمدة لا تتجاوز سنتين، ويجب تقديم الطلب خلال الأسبوع الأول من الفصل.",
+        exams: "علامة المساق تشمل أعمال الفصل وامتحان نهائي، ويمكن طلب مراجعة العلامة خلال 3 أيام.",
+        warning: "يوجه تحذير أكاديمي إذا انخفض المعدل التراكمي عن 65% أو المعدل التخصصي عن 70%.",
+        graduation: "للتخرج يجب إنهاء جميع المواد بنجاح ومعدل عام 65% ومعدل تخصصي 70% مع التدريب الميداني.",
+        excellence: "منحة التفوق تمنح إذا كان المعدل الفصلي 95% أو أكثر وكان الطالب ناجحاً في 15 ساعة.",
+        greeting: "مرحبًا بك في المساعد الأكاديمي لجامعة بوليتكنك فلسطين.",
+        unknown: "لم أفهم السؤال. يمكنك السؤال عن السحب والإضافة أو التأجيل أو الامتحانات أو التخرج.",
+      };
+
+      function getFallbackReply(message) {
+        const msg = message.trim();
+        if (!msg) return FALLBACK_RESPONSES.unknown;
+
+        for (const intent in FALLBACK_PATTERNS) {
+          if (FALLBACK_PATTERNS[intent].test(msg)) {
+            return FALLBACK_RESPONSES[intent] || FALLBACK_RESPONSES.unknown;
+          }
+        }
+
+        return FALLBACK_RESPONSES.unknown;
+      }
+
+      function appendMessage(text, role, skipAnimation) {
+        const frag = document.createDocumentFragment();
+        const msg = document.createElement("div");
+        msg.className = "msg " + role;
+        if (skipAnimation) msg.style.animation = "none";
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble " + role;
+        bubble.textContent = text;
+
+        if (role === "bot") {
+          const meta = document.createElement("div");
+          meta.className = "meta";
+          meta.textContent = "مساعد PPU";
+          msg.appendChild(meta);
+        }
+
+        msg.appendChild(bubble);
+        frag.appendChild(msg);
+        chat.appendChild(frag);
+        requestAnimationFrame(function () { chat.scrollTop = chat.scrollHeight; });
+      }
+
+      function showTyping() {
+        const frag = document.createDocumentFragment();
+        const msg = document.createElement("div");
+        msg.className = "msg bot";
+        msg.setAttribute("data-typing", "1");
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble bot typing";
+        bubble.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+
+        msg.appendChild(bubble);
+        frag.appendChild(msg);
+        chat.appendChild(frag);
+        requestAnimationFrame(function () { chat.scrollTop = chat.scrollHeight; });
+      }
+
+      function removeTyping() {
+        const el = chat.querySelector("[data-typing='1']");
+        if (el) el.remove();
+      }
+
+      async function sendUserMessage(text) {
+        if (!text || !text.trim()) return;
+        const t = text.trim();
+        appendMessage(t, "user");
+        input.value = "";
+
+        btnSend.disabled = true;
+        showTyping();
+
+        try {
+          const res = await fetch("/ask", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({ message: t }),
+          });
+
+          const data = await res.json();
+          removeTyping();
+          appendMessage(data.response || "حدث خطأ، حاول مرة أخرى.", "bot");
+        } catch (err) {
+          removeTyping();
+          const fallback = getFallbackReply(t);
+          appendMessage(fallback, "bot");
+          console.error(err);
+        } finally {
+          btnSend.disabled = false;
+          input.focus();
+        }
+      }
+
+      function openChat() {
+        panel.classList.add("open");
+        panel.setAttribute("aria-hidden", "false");
+        toggleBtn.setAttribute("aria-label", "إغلاق الدردشة");
+        toggleBtn.title = "إغلاق الدردشة";
+        input.focus();
+      }
+
+      function closeChat() {
+        panel.classList.remove("open");
+        panel.setAttribute("aria-hidden", "true");
+        toggleBtn.setAttribute("aria-label", "فتح الدردشة");
+        toggleBtn.title = "فتح الدردشة";
+      }
+
+      toggleBtn.addEventListener("click", function () {
+        if (panel.classList.contains("open")) {
+          closeChat();
+        } else {
+          openChat();
+        }
+      });
+
+      closeBtn.addEventListener("click", function () {
+        closeChat();
+      });
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        sendUserMessage(input.value);
+      });
+
+      chips.addEventListener("click", function (e) {
+        const btn = e.target.closest(".chip");
+        if (btn && btn.dataset.msg) sendUserMessage(btn.dataset.msg);
+      });
+
+      appendMessage("مرحباً! كيف يمكنني مساعدتك اليوم في جامعة PPU؟", "bot", true);
+    })();
+  </script>
+</body>
+</html>

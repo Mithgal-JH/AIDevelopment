@@ -1,0 +1,48 @@
+version: "3.1"
+
+intents:
+  - greet
+  - ask_course
+  - inform_course
+  - thanks
+  - goodbye
+  - ask_policies
+  - ask_attendance
+  - ask_absence
+  - ask_fail_rules
+  - ask_grades
+
+responses:
+
+  utter_iamabot:
+    - text: "انا مساعد ذكي خاص بجامعة بوليتكنك فلسطين🎓"
+
+  utter_greet:
+    - text: "أهلا فيك في بوت جامعة PPU 🎓 كيف بقدر أساعدك؟"
+
+  utter_ask_course:
+    - text: "أي نوع مواد بدك؟ (برمجة، رياضيات، شبكات، ذكاء اصطناعي)"
+
+  utter_thanks:
+    - text: "على الرحب والسعة 😊"
+
+  utter_goodbye:
+    - text: "بالتوفيق 👋"
+
+  utter_policies:
+    - text: "📘 يجب الالتزام بقوانين الجامعة، الحضور المنتظم، وعدم الغش."
+
+  utter_attendance:
+    - text: "📅 الحضور مهم جداً، وتجاوز نسبة الغياب قد يؤدي إلى الحرمان."
+
+  utter_absence:
+    - text: "📅 عدد الغيابات المسموح به حسب نوع المحاضرة:\n\n• محاضرات 75 دقيقة: 4 غيابات\n• محاضرات 50 دقيقة: 6 غيابات\n• المختبرات: 2 غيابات فقط\n\n❗ تجاوز الحد المسموح قد يؤدي إلى الحرمان من الامتحان النهائي."
+
+  utter_fail_rules:
+    - text: "📉 إذا رسبت في مادة، يمكنك إعادتها في فصل لاحق."
+
+  utter_grades:
+    - text: "📊 يتم حساب المعدل بناءً على أعمال الفصل والامتحان النهائي."
+
+actions:
+  - action_ask_course

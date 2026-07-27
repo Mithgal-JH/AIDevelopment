@@ -1,0 +1,23 @@
+Test Case 1
+Input:
+- Age: 24
+- Monthly_Income: 2100
+- Years_With_Company: 1
+- Num_Products: 1
+- Credit_Score: 540
+- Support_Calls: 8
+Expected Output:
+- Prediction: Leave
+- Leave_Probability: 1.0
+
+Test Case 2
+Input:
+- Age: 48
+- Monthly_Income: 7600
+- Years_With_Company: 9
+- Num_Products: 4
+- Credit_Score: 780
+- Support_Calls: 1
+Expected Output:
+- Prediction: Stay
+- Leave_Probability: 0.0

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جامعة بوليتكنك فلسطين</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0d1b2a 0%, #1a2f45 50%, #0d1b2a 100%);
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 25% 15%, rgba(196, 160, 80, 0.12) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 85%, rgba(196, 160, 80, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .hero {
+            text-align: center;
+            z-index: 1;
+        }
+
+        .hero img {
+            width: 180px;
+            height: auto;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.4));
+        }
+
+        .hero h1 {
+            color: #e8d5a3;
+            font-size: 2.5rem;
+            margin: 0;
+            font-weight: 700;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* زر تشغيل الدردشة */
+        #chat-trigger {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #c4a050, #a07830);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(196, 160, 80, 0.45), 0 0 0 0 rgba(196, 160, 80, 0.4);
+            z-index: 1000;
+            transition: transform 0.25s, box-shadow 0.25s;
+            animation: pulse 2.5s infinite;
+        }
+
+        #chat-trigger:hover {
+            transform: scale(1.1);
+        }
+
+        #chat-trigger svg {
+            width: 28px;
+            height: 28px;
+            fill: white;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 4px 20px rgba(196, 160, 80, 0.45), 0 0 0 0 rgba(196, 160, 80, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 4px 20px rgba(196, 160, 80, 0.45), 0 0 0 10px rgba(196, 160, 80, 0);
+            }
+        }
+
+        /* نافذة الدردشة */
+        #chat-window {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 360px;
+            height: 500px;
+            background: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            border: 1px solid rgba(196, 160, 80, 0.2);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #1a2f45, #0d1b2a);
+            color: #e8d5a3;
+            padding: 16px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(196, 160, 80, 0.25);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .header-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            margin-left: 7px;
+            box-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
+        }
+
+        .close-btn {
+            cursor: pointer;
+            opacity: 0.7;
+            font-size: 18px;
+            transition: opacity 0.2s;
+        }
+
+        .close-btn:hover {
+            opacity: 1;
+        }
+
+        /* منطقة الرسائل */
+        #chat-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #f5f3ef;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 380px;
+        }
+
+        #chat-box::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #chat-box::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #chat-box::-webkit-scrollbar-thumb {
+            background: #c4a050;
+            border-radius: 4px;
+        }
+
+        .msg {
+            padding: 10px 14px;
+            border-radius: 14px;
+            max-width: 80%;
+            font-size: 13px;
+            line-height: 1.6;
+            word-wrap: break-word;
+        }
+
+        .user {
+            background: linear-gradient(135deg, #1a2f45, #0d1b2a);
+            color: #e8d5a3;
+            align-self: flex-start;
+            border-bottom-right-radius: 3px;
+        }
+
+        .bot {
+            background: #ffffff;
+            color: #1a2f45;
+            align-self: flex-end;
+            border: 1px solid #e0d8c8;
+            border-bottom-left-radius: 3px;
+        }
+
+        /* مؤشر الكتابة */
+        .typing {
+            display: none;
+            align-self: flex-end;
+            background: transparent;
+            border: none;
+            padding: 5px 12px;
+        }
+
+        .dot {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            background: #c4a050;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1.0);
+            }
+        }
+
+        /* منطقة الإدخال */
+        .input-area {
+            padding: 12px 15px;
+            background: white;
+            border-top: 1px solid #e8e0d0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #d8cfbe;
+            border-radius: 22px;
+            outline: none;
+            font-family: 'Cairo', sans-serif;
+            font-size: 13px;
+            background: #faf8f4;
+            color: #333;
+            transition: border-color 0.2s;
+        }
+
+        #user-input:focus {
+            border-color: #c4a050;
+        }
+
+        .send-btn {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #c4a050, #a07830);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .send-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="hero">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="PPU Logo">
+        <h1>جامعة بوليتكنك فلسطين</h1>
+    </div>
+
+    <div id="chat-trigger" onclick="toggleChat()" title="المساعد الافتراضي">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path
+                d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2ZM20 16H5.17L4 17.17V4H20V16Z" />
+            <path d="M7 9H17V11H7V9ZM7 6H17V8H7V6ZM7 12H13V14H7V12Z" />
+        </svg>
+    </div>
+
+    <div id="chat-window">
+        <div class="chat-header">
+            <span>
+                <span class="header-dot"></span>
+                مساعد الجامعة الافتراضي
+            </span>
+            <span class="close-btn" onclick="toggleChat()">✕</span>
+        </div>
+        <div id="chat-box">
+            <div class="msg bot">مرحباً بك في بوليتكنك فلسطين، كيف يمكنني مساعدتك؟</div>
+        </div>
+
+        <div id="loading" class="msg bot typing">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+
+        <div class="input-area">
+            <button class="send-btn" onclick="askBot()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" />
+                </svg>
+            </button>
+            <input type="text" id="user-input" placeholder="اكتب سؤالك واضغط Enter..." autocomplete="off">
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function toggleChat() {
+            $('#chat-window').fadeToggle(300);
+            $('#user-input').focus();
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            var chatBox = document.getElementById("chat-box");
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function askBot() {
+            let text = $('#user-input').val().trim();
+            if (!text) return;
+
+            $('#chat-box').append(`<div class="msg user">${text}</div>`);
+            $('#user-input').val('');
+
+            let loading = $('#loading').detach();
+            $('#chat-box').append(loading);
+            loading.show();
+            scrollToBottom();
+
+            $.post('/ask', { message: text }, function (data) {
+                loading.hide();
+                $('#chat-box').append(`<div class="msg bot">${data.answer}</div>`);
+                scrollToBottom();
+            });
+        }
+
+        $('#user-input').on('keypress', function (e) {
+            if (e.which == 13) askBot();
+        });
+    </script>
+</body>
+
+</html>

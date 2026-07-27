@@ -1,0 +1,231 @@
+:root{
+    --page-bg: #0b1220;
+    --primary: #6c8ff5;
+    --primary-2: #34c759;
+    --secondary: #ffd700; /* Gold color for Ramadan */
+    --accent: #8b4513; /* Brown for Islamic theme */
+    --card: rgba(17, 24, 39, 0.86);
+    --border: rgba(255,255,255,0.12);
+    --user: rgba(52, 199, 89, 0.25);
+    --text: #e5e7eb;
+    --islamic-green: #009688;
+    --ramadan-purple: #6a0dad;
+}
+
+body {
+    margin: 0;
+    font-family: 'Amiri', serif; /* Islamic font */
+    background:
+        radial-gradient(1200px 700px at 15% 15%, rgba(108, 143, 245, 0.28), transparent 55%),
+        radial-gradient(900px 500px at 85% 20%, rgba(52, 199, 89, 0.18), transparent 55%),
+        radial-gradient(800px 600px at 50% 50%, rgba(255, 215, 0, 0.1), transparent 60%),
+        linear-gradient(180deg, #050814, var(--page-bg));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    color: var(--text);
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#logo { width: 300px; }
+
+#verses-section {
+    margin: 20px 0;
+    max-width: 1000px;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(0, 150, 136, 0.1), rgba(106, 13, 173, 0.1));
+    border-radius: 20px;
+    padding: 20px;
+    border: 2px solid var(--secondary);
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+}
+
+#verses-section h2 {
+    color: var(--secondary);
+    font-size: 28px;
+    margin-bottom: 20px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.verse-item {
+    background: linear-gradient(135deg, var(--card), rgba(255, 215, 0, 0.05));
+    border: 2px solid var(--border);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 15px 0;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.verse-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 35px rgba(255, 215, 0, 0.3);
+}
+
+.verse-text {
+    font-size: 22px;
+    line-height: 1.8;
+    margin-bottom: 10px;
+    color: var(--text);
+    font-weight: 500;
+}
+
+.verse-ref {
+    font-size: 16px;
+    color: var(--secondary);
+    font-weight: bold;
+    background: rgba(255, 215, 0, 0.1);
+    padding: 5px 10px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+#bot-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 350px;
+    height: 450px;
+    background: linear-gradient(135deg, var(--card), rgba(0, 150, 136, 0.1));
+    border-radius: 25px;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.45), 0 0 20px rgba(255, 215, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 2px solid var(--secondary);
+    transform-origin: bottom right;
+}
+
+#bot-header {
+    background: linear-gradient(135deg, var(--primary), var(--secondary), var(--islamic-green));
+    color: white;
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    border-top-left-radius: 23px;
+    border-top-right-radius: 23px;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+#bot-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    background: linear-gradient(180deg, rgba(108,143,245,0.12), transparent 60%);
+}
+
+.msg-user {
+    background: var(--user);
+    padding: 10px;
+    margin: 6px 5px;
+    border-radius: 15px;
+    text-align: right;
+    border: 1px solid rgba(52,199,89,0.35);
+}
+
+.msg-bot {
+    background: rgba(255,255,255,0.06);
+    padding: 10px;
+    margin: 6px 5px;
+    border-radius: 15px;
+    border: 1px solid var(--border);
+    text-align: left;
+    direction: rtl;
+}
+
+#bot-input {
+    display: flex;
+    padding: 5px;
+    border-top: 1px solid var(--border);
+    gap: 6px;
+}
+
+#bot-input input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 15px;
+    outline: none;
+    direction: rtl;
+    text-align: right;
+}
+
+#bot-input button {
+    background: linear-gradient(135deg, var(--primary), #2a4bd7);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 10px 22px rgba(108,143,245,0.22);
+    transition: transform 120ms ease, box-shadow 160ms ease, filter 160ms ease;
+}
+
+#bot-input button:hover {
+    filter: brightness(1.07);
+    box-shadow: 0 14px 32px rgba(108,143,245,0.30);
+}
+
+#bot-input button:active {
+    transform: scale(0.98);
+}
+
+#bot-header {
+    letter-spacing: 0.2px;
+}
+
+#open-bot {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, var(--secondary), var(--islamic-green));
+    color: white;
+    font-size: 28px;
+    border-radius: 50%;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(255, 215, 0, 0.4), 0 0 15px rgba(0, 150, 136, 0.3);
+    border: 3px solid rgba(255,255,255,0.8);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#open-bot:hover {
+    transform: scale(1.1);
+    box-shadow: 0 15px 35px rgba(255, 215, 0, 0.5), 0 0 20px rgba(0, 150, 136, 0.4);
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 10px 20px rgba(0,0,0,0.20); }
+    50% { transform: scale(1.06); box-shadow: 0 14px 28px rgba(0,0,0,0.22); }
+    100% { transform: scale(1); box-shadow: 0 10px 20px rgba(0,0,0,0.20); }
+}
+
+#open-bot { animation: pulse 2.8s ease-in-out infinite; }
+
+@media (max-width: 520px) {
+    #bot-container { right: 10px; bottom: 10px; width: calc(100% - 20px); }
+    #open-bot { right: 10px; bottom: 10px; }
+    body { justify-content: flex-start; padding-top: 70px; height: auto; min-height: 100vh; }
+}

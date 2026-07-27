@@ -1,0 +1,29 @@
+version: "3.1"
+
+intents:
+  - greet
+  - ask_doctor
+  - inform_specialty
+  - appointments
+  - thanks
+  - goodbye
+
+responses:
+
+  utter_greet:
+    - text: "مرحباً 👋 كيف يمكنني مساعدتك؟"
+
+  utter_appointments:
+    - text: "نحن نعمل من 8 صباحاً حتى 8 مساءً 🕗"
+
+  utter_thanks:
+    - text: "العفو 😊"
+
+  utter_goodbye:
+    - text: "مع السلامة 👋"
+
+  utter_default:
+    - text: "⚠️ لم أفهم الطلب، هل يمكنك التوضيح؟"
+
+actions:
+  - action_ask_doctor

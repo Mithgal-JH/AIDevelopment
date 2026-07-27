@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <title>اتقان</title>
+
+  <style>
+    body {
+      font-family: Tahoma;
+      background: #f4f6f8;
+      margin: 0;
+      direction: rtl;
+      text-align: right;
+    }
+
+    /* الشعار */
+    .header {
+      text-align: center;
+      margin-top: 55px;
+    }
+
+    .logo {
+      width: 180px;
+    }
+
+    .title {
+      font-size: 42px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .accent {
+      color: #0078d7;
+      font-weight: bold;
+    }
+
+    .subtitle {
+      font-size: 26px;
+      color: #555;
+      margin-top: 10px;
+    }
+
+    /* زر البوت */
+    .bot-toggle {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+
+      width: 65px;
+      height: 65px;
+
+      border-radius: 50%;
+      border: none;
+
+      background: #ffffff;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      cursor: pointer;
+
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .bot-toggle img {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+    }
+
+    /* البوت */
+    .chat-box {
+      width: 340px;
+      height: 520px;
+      background: white;
+      border-radius: 14px;
+      border: 2px solid #ddd;
+
+      position: fixed;
+      right: 20px;
+      top: 120px;
+
+      display: none;
+      flex-direction: column;
+    }
+
+    /* رأس البوت */
+    .bot-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    /* زر الإغلاق */
+    .x-close {
+      position: absolute;
+      left: 10px;
+      background: none;
+      border: none;
+      color: #ff3b3b;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    /* الرسائل */
+    .messages {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+    }
+
+    .msg {
+      margin: 8px 0;
+      padding: 8px 12px;
+      border-radius: 10px;
+      max-width: 90%;
+      line-height: 1.5;
+    }
+
+    .user {
+      color: white;
+      background: #0078d7;
+      margin-left: auto;
+      text-align: left;
+    }
+
+    .bot {
+      color: #333;
+      background: #f0f0f0;
+      margin-right: auto;
+    }
+
+    /* التحكم */
+    .controls {
+      display: flex;
+      gap: 8px;
+      padding: 10px;
+      border-top: 1px solid #eee;
+    }
+
+    button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-family: Tahoma;
+      font-size: 14px;
+    }
+
+    select {
+      flex: 2;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-family: Tahoma;
+      font-size: 14px;
+      direction: rtl;
+    }
+
+    .mic {
+      background: #28a745;
+    }
+
+    .mic:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+
+    .start {
+      background: #0078d7;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    <img src="/static/logo.png" class="logo">
+
+    <div class="title">
+      رحلتي مع القرآن مع <span class="accent">إتقان</span>
+    </div>
+
+    <div class="subtitle">📖 تحدي الحفظ الصوتي</div>
+  </div>
+
+  <!-- زر البوت -->
+  <button class="bot-toggle" onclick="toggleBot()">
+    <img src="/static/book.png">
+  </button>
+
+  <!-- البوت -->
+  <div class="chat-box" id="chatBox">
+
+    <div class="bot-header">
+      <div>🧠 ذاكرة الحفظ - إتقان</div>
+      <button class="x-close" onclick="closeBot()">✖</button>
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+    <div class="controls">
+      <select id="surah">
+        <option value="">اختر السورة</option>
+        <option value="al_kawthar">سورة الكوثر</option>
+        <option value="al_ikhlas">سورة الإخلاص</option>
+        <option value="al_nasr">سورة النصر</option>
+      </select>
+
+      <button class="start" onclick="startSurah()">ابدأ</button>
+    </div>
+
+    <div class="controls">
+      <button class="mic" id="micBtn" onclick="startRec()" disabled>🎤 تكلم</button>
+    </div>
+
+  </div>
+
+  <audio id="winSound" src="/static/win.mp3"></audio>
+  <audio id="wrongSound" src="/static/wrong.mp3"></audio>
+  <audio id="correctSound" src="/static/correct.mp3"></audio>
+
+  <script>
+    const chat = document.getElementById("messages");
+    const micBtn = document.getElementById("micBtn");
+    let currentAyah = 1;
+    let open = false;
+    let welcomed = false;
+    let sessionStarted = false;
+
+    function add(text, cls) {
+      const d = document.createElement("div");
+      d.className = "msg " + cls;
+      d.innerText = text;
+      chat.appendChild(d);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function toggleBot() {
+      document.getElementById("chatBox").style.display =
+        (open = !open) ? "flex" : "none";
+
+      if (open && !welcomed) {
+        add("👋 أهلاً بك في إتقان!", "bot");
+        add("اختر السورة التي تريد حفظها ثم اضغط ابدأ 📖", "bot");
+        welcomed = true;
+      }
+    }
+
+    function closeBot() {
+      document.getElementById("chatBox").style.display = "none";
+      open = false;
+    }
+
+    async function startSurah() {
+      const surah = document.getElementById("surah").value;
+
+      if (!surah) {
+        add("⚠️ الرجاء اختيار السورة أولاً", "bot");
+        return;
+      }
+
+      const res = await fetch("/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ surah })
+      });
+
+      const data = await res.json();
+
+      if (data.status === "error") {
+        add("❌ حدث خطأ، حاول مرة أخرى", "bot");
+        return;
+      }
+
+      currentAyah = data.ayah_number || 1;
+      sessionStarted = true;
+      micBtn.disabled = false;
+
+      add("✅ " + data.message, "bot");
+      add("📖 الآية رقم " + currentAyah, "bot");
+    }
+
+    async function startRec() {
+      if (!sessionStarted) {
+        add("⚠️ اختر السورة واضغط ابدأ أولاً", "bot");
+        return;
+      }
+
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      if (!SpeechRec) {
+        add("❌ المتصفح لا يدعم التعرف على الصوت، جرب Chrome", "bot");
+        return;
+      }
+
+      const rec = new SpeechRec();
+      rec.lang = "ar-SA";
+
+      micBtn.textContent = "🔴 جارٍ الاستماع...";
+      micBtn.disabled = true;
+
+      rec.start();
+
+      rec.onresult = async function (e) {
+        const text = e.results[0][0].transcript;
+        add(text, "user");
+
+        const res = await fetch("/check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text })
+        });
+
+        const data = await res.json();
+        add(data.message, "bot");
+
+        if (data.status === "ok") {
+          document.getElementById("correctSound").play();
+          if (data.ayah_number) {
+            currentAyah = data.ayah_number;
+            add("📖 الآية رقم " + currentAyah, "bot");
+          }
+        }
+
+        if (data.status === "win") {
+          document.getElementById("winSound").play();
+          sessionStarted = false;
+          micBtn.disabled = true;
+        }
+
+        if (data.status === "wrong") {
+          document.getElementById("wrongSound").play();
+        }
+
+        micBtn.textContent = "🎤 تكلم";
+        micBtn.disabled = !sessionStarted;
+      };
+
+      rec.onerror = function () {
+        add("❌ لم يتم التعرف على الصوت، حاول مرة أخرى", "bot");
+        micBtn.textContent = "🎤 تكلم";
+        micBtn.disabled = false;
+      };
+    }
+  </script>
+
+</body>
+
+</html>

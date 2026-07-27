@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>المستشفى الأهلي - ChatBot</title>
+
+<style>
+body {
+    font-family: Tahoma, Arial;
+    margin: 0;
+    background: white;
+}
+
+/* ===== الصفحة الرئيسية ===== */
+.center {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.center img {
+    width: 160px;
+    margin-bottom: 20px;
+}
+
+/* العنوان الرئيسي */
+.center h1 {
+    font-size: 70px;
+    margin: 10px;
+    color: black;
+    font-weight: bold;
+}
+
+/* النص الفرعي */
+.center p {
+    font-size: 26px;
+    color: black;
+}
+
+/* ===== زر الشات ===== */
+#chat-btn {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0a7cff, #0056d6);
+    color: white;
+    border: none;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+/* ===== نافذة الشات ===== */
+#chat-box {
+    position: fixed;
+    bottom: 110px;
+    right: 25px;
+    width: 360px;
+    height: 500px;
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* ===== الهيدر ===== */
+#chat-header {
+    background: linear-gradient(135deg, #0a7cff, #0056d6);
+    color: white;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+}
+
+/* ===== الرسائل ===== */
+#messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    background: #f9fafc;
+}
+
+/* رسالة البوت */
+.bot {
+    background: #e9eef7;
+    padding: 10px;
+    border-radius: 12px;
+    margin: 8px 0;
+    max-width: 80%;
+    text-align: right;
+}
+
+/* رسالة المستخدم */
+.user {
+    background: #0a7cff;
+    color: white;
+    padding: 10px;
+    border-radius: 12px;
+    margin: 8px 0;
+    max-width: 80%;
+    margin-left: auto;
+    text-align: right;
+}
+
+/* مؤشر الكتابة */
+.typing {
+    font-size: 12px;
+    color: gray;
+    margin: 5px;
+}
+
+/* ===== الإدخال ===== */
+#chat-input {
+    border-top: 1px solid #ddd;
+    padding: 10px;
+}
+
+#chat-input input {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    outline: none;
+    font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- الصفحة الرئيسية -->
+<div class="center">
+    <img src="/static/logo.png" alt="logo">
+    <h1>المستشفى الأهلي</h1>
+    <p>نحن بعون الله نرعاكم</p>
+</div>
+
+<!-- زر فتح الشات -->
+<button id="chat-btn">💬</button>
+
+<!-- نافذة الشات -->
+<div id="chat-box">
+
+    <div id="chat-header">
+        🤖 مساعد المستشفى
+        <span onclick="toggleChat()" style="cursor:pointer">✖</span>
+    </div>
+
+    <div id="messages"></div>
+
+    <div id="chat-input">
+        <input type="text" id="input" placeholder="اكتب رسالتك هنا...">
+    </div>
+
+</div>
+
+<script>
+const chatBtn = document.getElementById("chat-btn");
+const chatBox = document.getElementById("chat-box");
+const messages = document.getElementById("messages");
+const input = document.getElementById("input");
+
+chatBtn.onclick = toggleChat;
+
+function toggleChat() {
+    chatBox.style.display = chatBox.style.display === "flex" ? "none" : "flex";
+
+    if (messages.innerHTML === "") {
+        addBot("🤖 أهلاً بك 🌿<br>اكتب: مرحبا - أطباء - مواعيد - خروج");
+    }
+}
+
+input.addEventListener("keydown", async function(e) {
+    if (e.key === "Enter" && input.value.trim() !== "") {
+
+        const text = input.value.trim();
+        addUser(text);
+        input.value = "";
+
+        showTyping();
+
+        try {
+            const res = await fetch("/chat", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({message: text})
+            });
+
+            const data = await res.json();
+
+            hideTyping();
+
+            if (data.reply && data.reply.length > 0) {
+                data.reply.forEach(r => addBot(r));
+            } else {
+                addBot("⚠️ لم أفهم الطلب");
+            }
+
+        } catch {
+            hideTyping();
+            addBot("❌ تعذر الاتصال بالخادم");
+        }
+    }
+});
+
+function addBot(text) {
+    messages.innerHTML += `<div class="bot">${text}</div>`;
+    messages.scrollTop = messages.scrollHeight;
+}
+
+function addUser(text) {
+    messages.innerHTML += `<div class="user">${text}</div>`;
+    messages.scrollTop = messages.scrollHeight;
+}
+
+function showTyping() {
+    messages.innerHTML += `<div id="typing" class="typing">🤖 يكتب الآن...</div>`;
+    messages.scrollTop = messages.scrollHeight;
+}
+
+function hideTyping() {
+    const t = document.getElementById("typing");
+    if (t) t.remove();
+}
+</script>
+
+</body>
+</html>

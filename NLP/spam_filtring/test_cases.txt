@@ -1,0 +1,83 @@
+Spam Filter Bot - Test Cases
+============================
+
+Arabic Test Cases
+-----------------
+1) فزت بجائزة نقدية اليوم، اضغط هنا للاستلام
+Expected: Spam
+
+2) احصل على قرض سريع بدون فوائد الآن
+Expected: Spam
+
+3) عرض محدود! هاتف مجاني لأول 100 مشترك
+Expected: Spam
+
+4) تحصل على بطاقة هدية مجانا اليوم
+Expected: Spam
+
+5) اسرع قبل انتهاء العرض
+Expected: Spam
+
+6) يرجى مراجعة مستندات المشروع وإرسال الملاحظات
+Expected: Important
+
+7) اجتماع الفريق غدًا الساعة 10 صباحًا
+Expected: Important
+
+8) تحديث على حالة الطلبية الخاصة بك
+Expected: Important
+
+9) جدول العمل الأسبوع القادم مرفق
+Expected: Important
+
+10) دعوة لحضور مؤتمر التقنية الأسبوع المقبل
+Expected: Important
+
+English Test Cases
+------------------
+1) Congratulations! You are a lucky winner, claim your reward now
+Expected: Spam
+
+2) Limited time offer on electronics, buy today
+Expected: Spam
+
+3) Double your income easily from home
+Expected: Spam
+
+4) Click here to unlock your free coupon
+Expected: Spam
+
+5) Cheap loans available instantly, apply now
+Expected: Spam
+
+6) Reminder: Team meeting tomorrow at 9AM
+Expected: Important
+
+7) Please find attached the project budget
+Expected: Important
+
+8) Can you review the Q2 report before lunch?
+Expected: Important
+
+9) Client meeting scheduled at 2 PM
+Expected: Important
+
+10) Please update the spreadsheet and share by tonight
+Expected: Important
+
+Mixed/Challenging Cases
+-----------------------
+1) Free عرض خاص اليوم فقط
+Expected: Likely Spam
+
+2) Important notice: verify your account now
+Expected: Ambiguous (Spam or Important)
+
+3) Meeting offer for next week
+Expected: Likely Important
+
+4) Win a meeting with our CEO
+Expected: Ambiguous (can flip)
+
+5) يرجى الضغط هنا لتأكيد الحضور للاجتماع
+Expected: Ambiguous (can flip)

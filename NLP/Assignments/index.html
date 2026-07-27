@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>مطعم القدس</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Tajawal", Arial;
+      background: #fffaf0;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      background: #8b0000;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar h2 {
+      margin: 0;
+    }
+
+    .navbar a {
+      color: white;
+      margin-left: 15px;
+      text-decoration: none;
+    }
+
+    /* HERO */
+    .hero {
+      height: 90vh;
+      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+                  url("https://images.unsplash.com/photo-1555396273-367ea4eb4db5");
+      background-size: cover;
+      background-position: center;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 48px;
+      margin: 10px;
+    }
+
+    .hero p {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+
+    .hero button {
+      padding: 12px 25px;
+      background: #facc15;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    /* MENU */
+    .menu {
+      padding: 50px 20px;
+      text-align: center;
+    }
+
+    .menu h2 {
+      color: #8b0000;
+    }
+
+    .menu-items {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .card {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .card h3 {
+      margin: 10px 0;
+    }
+
+    .price {
+      color: #b91c1c;
+      font-weight: bold;
+    }
+
+    /* FOOTER */
+    .footer {
+      background: #8b0000;
+      color: white;
+      text-align: center;
+      padding: 15px;
+    }
+
+    /* CHAT */
+    .chat-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #b91c1c;
+      color: white;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .chat-box {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 320px;
+      height: 420px;
+      background: white;
+      border-radius: 12px;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .chat-box.active {
+      display: flex;
+    }
+
+    .chat-header {
+      background: #8b0000;
+      color: white;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      background: #f9fafb;
+    }
+
+    .msg {
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 10px;
+      max-width: 70%;
+    }
+
+    .bot { background: #fde68a; }
+    .user { background: #dcfce7; margin-right: auto; }
+
+    .chat-input {
+      display: flex;
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+    }
+
+    .chat-input button {
+      background: #b91c1c;
+      color: white;
+      border: none;
+      padding: 10px;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <h2>مطعم القدس 🍽️</h2>
+  <div>
+    <a href="#">الرئيسية</a>
+    <a href="#">القائمة</a>
+    <a href="#">تواصل</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>أشهى المأكولات الفلسطينية</h1>
+  <p>نكهات أصلية من قلب القدس ❤️</p>
+  <button onclick="openChat()">اطلب الآن</button>
+</div>
+
+<!-- MENU -->
+<div class="menu">
+  <h2>قائمة الطعام</h2>
+
+  <div class="menu-items">
+    <div class="card">
+      <h3>مسخن</h3>
+      <p>دجاج مع بصل وزيت زيتون</p>
+      <div class="price">30₪</div>
+    </div>
+
+    <div class="card">
+      <h3>مقلوبة</h3>
+      <p>رز مع خضار ولحم</p>
+      <div class="price">28₪</div>
+    </div>
+
+    <div class="card">
+      <h3>حمص</h3>
+      <p>حمص طازج مع طحينة</p>
+      <div class="price">15₪</div>
+    </div>
+
+    <div class="card">
+      <h3>كنافة</h3>
+      <p>حلوى نابلسية لذيذة</p>
+      <div class="price">12₪</div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  جميع الحقوق محفوظة © مطعم القدس 2026
+</div>
+
+<!-- CHAT -->
+<button class="chat-btn" onclick="openChat()">💬</button>
+
+<div class="chat-box" id="chatBox">
+  <div class="chat-header">
+    <span>الدعم</span>
+    <button onclick="closeChat()">✖</button>
+  </div>
+
+  <div class="chat-messages" id="messages"></div>
+
+  <div class="chat-input">
+    <input id="input" placeholder="اكتب رسالتك..." />
+    <button onclick="sendMessage()">إرسال</button>
+  </div>
+</div>
+
+<script>
+function openChat() {
+  document.getElementById("chatBox").classList.add("active");
+}
+
+function closeChat() {
+  document.getElementById("chatBox").classList.remove("active");
+}
+
+function addMessage(text, sender) {
+  const div = document.createElement("div");
+  div.className = "msg " + sender;
+  div.innerText = text;
+  document.getElementById("messages").appendChild(div);
+}
+
+async function sendMessage() {
+  const input = document.getElementById("input");
+  const text = input.value.trim();
+
+  if (!text) return;
+
+  addMessage(text, "user");
+  input.value = "";
+
+  try {
+    const res = await fetch("http://127.0.0.1:5000/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message: text })
+    });
+
+    const data = await res.json();
+    addMessage(data.reply || data.response || "ما في رد 😅", "bot");
+
+  } catch (err) {
+    addMessage("❌ في مشكلة بالسيرفر", "bot");
+  }
+}
+
+/* 🔥 Enter للإرسال + Shift+Enter لسطر جديد */
+const input = document.getElementById("input");
+
+input.addEventListener("keydown", function(e) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+</script>
+
+</body>
+</html>
